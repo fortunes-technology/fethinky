@@ -2,7 +2,8 @@ import Proto from "uberproto";
 import errors from "feathers-errors";
 import filter from "feathers-query-filters";
 import Promise from "promiscuous";
-
+//if(!global._babelPolyfill) { require('babel-polyfill'); }
+require('babel-polyfill');
 class Service {
   constructor(options) {
     if (!options.model) {
@@ -125,40 +126,64 @@ class Service {
 
   }
   
-  _patch(id, data) {
-    return this.get(id)
-      .then((found) => {
+  _patch(found, data) {
+    //return this.get(id)
+    //  .then((found) => {
         return found.merge(data).save();
-      });
+      //});
   }
   
   patch(id, data, params) {
     if(id === null) {
       return this._find(params).then(page => {
         return Promise.all(page.data.map(
-          current => this._patch(current.id, data, params))
+          current => this._patch(current, data))
         );
       });
-    } 
-    return this._patch(id, data, params);
+    }
+    return this.get(id)
+        .then((found) => {
+          //return found.merge(data).save();
+          return this._patch(found, data);
+        });
+    //return this._patch(id, data);
   }
 
   _update(id, data) {
-    return this.get(id)
-        .then((found) => {
-          return found.merge(data).save();
+    data.id = id;
+    return this.Model.get(id).replace(data)
+        .run()
+        .catch((err) => {
+          return Promise.reject(new errors.NotFound(`No record found for id '${id}'`));
         });
+    //return found.replace(data).run();
+    //var modelToUpdate = this.Model(data);
+    //modelToUpdate.id = id;
+    //return modelToUpdate.save();
   }
 
   update(id, data, params) {
     if(id === null) {
       return this._find(params).then(page => {
         return Promise.all(page.data.map(
-            current => this._patch(current.id, data, params))
+            current => this._update(current.id, data))
         );
       });
     }
-    return this._patch(id, data, params);
+    return this._update(id, data);
+    //data.id = id;
+    //return this.Model.get(id).replace(data)
+    //    .run()
+    //    .catch((err) => {
+    //      //console.log(err);
+    //      return Promise.reject(new errors.NotFound(`No record found for id '${id}'`));
+    //      //return new errors.NotFound(`No record found for id '${id}'`);
+    //    });
+    //return this.get(id).update(data).run();
+    //return this.get(id)
+    //    .then((found) => {
+    //      return this._update(found, data);
+    //    });
   }
 }
 

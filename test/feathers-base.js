@@ -35,8 +35,8 @@ export default function common(business, lander, _ids, errors, idProp = "id") {
       this.timeout(5000);
       business.get("568225fbfe21222432e836ff").catch(error => {
         expect(error).to.be.ok;
-        //expect(error instanceof errors.NotFound).to.be.ok;
-        //expect(error.message).to.equal("No record found for id '568225fbfe21222432e836ff'");
+        expect(error instanceof errors.NotFound).to.be.ok;
+        expect(error.message).to.equal("No record found for id '568225fbfe21222432e836ff'");
         done();
       });
     });
@@ -108,22 +108,35 @@ export default function common(business, lander, _ids, errors, idProp = "id") {
     });
   });
 
-  describe.skip("update", () => {
-    it("replaces an existing instance", done => {
-      business.update(_ids.Doug, { name: "Dougler" }).then(data => {
-        expect(data[idProp].toString()).to.equal(_ids.Doug.toString());
-        expect(data.name).to.equal("Dougler");
-        done();
-      }).catch(done);
-    });
+  describe("update", () => {
+    //it("replaces an existing instance", done => {
+    //  business.update(_ids.Doug, { name: "Dougler11"}).then(data => {
+    //    expect(data[idProp].toString()).to.equal(_ids.Doug.toString());
+    //    console.log(data);
+    //    expect(data.name).to.equal("Dougler11");
+    //    expect(data.website).to.be.notOk;
+    //    done();
+    //  }).catch(done);
+    //});
 
     it("returns NotFound error for non-existing id", done => {
       business.update("568225fbfe21222432e836ff", { name: "NotFound" }).then(done, error => {
         expect(error).to.be.ok;
         expect(error instanceof errors.NotFound).to.be.ok;
+        //console.log(error);
         expect(error.message).to.equal("No record found for id '568225fbfe21222432e836ff'");
         done();
       });
+    });
+
+    it("update an existing instance using param", done => {
+      business.update(null, { name: "Dougler11" }, {query: {name:"Doug"}}).then(data => {
+        console.log(data);
+        expect(data).to.be.instanceof(Array);
+        expect(data.length).to.equal(1);
+        expect(data[0].name).to.equal("Dougler11");
+        done();
+      }).catch(done);
     });
   });
 
