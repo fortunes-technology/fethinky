@@ -4,7 +4,7 @@
 
 1. Create a service using Thinky Model
 
-
+```
 var thinky = require("thinky")({
   host: process.env.RETHINK_HOST || "docker",
   db: "tests"
@@ -25,4 +25,4 @@ let _ids = {};
 let business = service({
   model: Business
 });
-
+```
